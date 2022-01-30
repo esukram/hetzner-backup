@@ -1,0 +1,6 @@
+.*id
+.*id.pub
+.pass-file
+
+snar/*
+backup.log
