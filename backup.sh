@@ -41,8 +41,6 @@ source "${lib_path}"
 
 SNAR_FILE=$(handle_snar "${TYPE}")
 
-trap 'errcho "sub-process failed!"' SIGUSR1
-
 upload_hetzner "${TYPE}" "${HOST}" <(
     ( encrypt "${PASS_FILE}" <(
       (archive "${SNAR_FILE}" "${DIR}") || kill_usr1 $$ )
