@@ -16,17 +16,30 @@ LAST_PIPE=""
 
 PID=$$
 
+function utc_time() {
+  date -u +'[%Y-%m-%d %H:%M:%S UTC]'
+}
+
 # log using own fd
 exec 5> >(cat)
 function outcho() {
-  >&5 echo "Log: $1"
+  local now_utc=$(utc_time)
+  local info="$(utc_time) Info: $1"
+
+  # log message to log file
+  echo "${info}" >> "${LOGFILE}"
+
+  >&5 echo "${info}"
 }
 function errcho() {
+  local now_utc=$(utc_time)
+  local error="$(utc_time) Error: $1"
+
   # log failure to log file
-  echo "Error: $1" >> "${LOGFILE}"
+  echo "${error}" >> "${LOGFILE}"
 
   # write to STDERR and exit
-  >&2 echo "$1"
+  >&2 echo "${error}"
   exit ${2:-1}
 }
 
@@ -42,7 +55,7 @@ function last_error() {
   local EXIT_CODE=$?
 
   if [ "${EXIT_CODE}" -ne 0 ]; then
-    errcho "\"${current_command}\" command failed(${EXIT_CODE})!."
+    errcho "\"${current_command}\" command failed(${EXIT_CODE})!"
   fi
 }
 trap last_error EXIT
@@ -99,7 +112,7 @@ function handle_snar() {
   [[ "${SNAP_AGE_DAYS}" -gt 6 ]] && echo -n "" > "${SNAR_FILE}"
 
   # check for same date execution
-  [[ "${SNAP_AGE_DAYS}" -lt 1 ]] && errcho "Type: '${TYPE} - cannot backup multiple times per day - aborting!"
+  [[ "${SNAP_AGE_DAYS}" -lt 1 ]] && errcho "Type: '${TYPE}' - cannot backup multiple times per day - aborting!"
 
   echo "${SNAR_FILE}"
 }
