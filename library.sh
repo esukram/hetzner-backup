@@ -101,18 +101,15 @@ function handle_snar() {
     touch "${SNAR_FILE}" && echo "${SNAR_FILE}" && return
 
   # on Monday's clear snar file
+  # TODO: Check for already executed on Monday's
   [[ "$(get_day)" -eq "1" ]] && \
     echo -n "" > "${SNAR_FILE}" && echo "${SNAR_FILE}" && return
 
-  # check for outdated snat file
-  local NOW_TS=$(date '+%s')
-  local SNAR_TS=$(date -r "${SNAR_FILE}" '+%s')
-  local SNAR_DIFF=$(($NOW_TS-$SNAR_TS))
-  local SNAP_AGE_DAYS=$(($SNAR_DIFF/(3600*24)))
-  [[ "${SNAP_AGE_DAYS}" -gt 6 ]] && echo -n "" > "${SNAR_FILE}"
-
   # check for same date execution
-  [[ "${SNAP_AGE_DAYS}" -lt 1 ]] && errcho "Type: '${TYPE}' - cannot backup multiple times per day - aborting!"
+  local TODAY_PATTERN=$(date '+%Y%m%d')
+  local SNAR_PATTERN=$(date -r "${SNAR_FILE}" '+%Y%m%d')
+  [[ "${TODAY_PATTERN}" == "${SNAR_PATTERN}" ]] && \
+    errcho "Type: '${TYPE}' - cannot backup multiple times per day - aborting!"
 
   echo "${SNAR_FILE}"
 }
